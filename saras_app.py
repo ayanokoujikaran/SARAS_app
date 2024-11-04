@@ -48,6 +48,10 @@ def update_attendance(date, presentees, absentees):
     connection = get_db_connection()
     if connection:
         cursor = connection.cursor()
+        # Avoid duplicates by deleting existing records before inserting new ones
+        cursor.execute("DELETE FROM Attendance WHERE attendance_date = %s AND student_id IN (SELECT student_id FROM Students WHERE roll_no IN (%s))", (date, ','.join(presentees + absentees)))
+        connection.commit()
+
         for roll_no in presentees:
             cursor.execute("INSERT INTO Attendance (student_id, attendance_date, status) VALUES ((SELECT student_id FROM Students WHERE roll_no=%s), %s, 'Present')", (roll_no, date))
         for roll_no in absentees:
@@ -55,6 +59,17 @@ def update_attendance(date, presentees, absentees):
         connection.commit()
         cursor.close()
         connection.close()
+
+# Delete attendance record
+def delete_attendance_record(student_id, date):
+    connection = get_db_connection()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM Attendance WHERE student_id = %s AND attendance_date = %s", (student_id, date))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        st.success("Record deleted successfully!")
 
 # Main application function
 def main():
@@ -67,7 +82,7 @@ def main():
         }
         .stButton>button {
             background-color: #4CAF50;
-            color: white;
+            color: white.
         }
         </style>
         """,
@@ -117,6 +132,12 @@ def main():
             if st.button("Update Attendance"):
                 update_attendance(date, presentees, absentees)
                 st.success("Attendance updated successfully!")
+            
+            st.write("Delete Attendance Record")
+            del_student_id = st.text_input("Enter Student ID to Delete Record")
+            del_date = st.date_input("Select Date to Delete Record")
+            if st.button("Delete Record"):
+                delete_attendance_record(del_student_id, del_date)
         
         if st.button("Logout"):
             st.session_state.logged_in = False
