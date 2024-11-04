@@ -17,14 +17,14 @@ def get_db_connection():
         return None
 
 # User login function
-def login_user(username, credential, role):
+def login_user(studentname, student_id, role):
     connection = get_db_connection()
     if connection:
         cursor = connection.cursor(dictionary=True)
         if role == 'Student':
-            cursor.execute("SELECT * FROM Students WHERE username=%s AND student_id=%s", (username, credential))
+            cursor.execute("SELECT * FROM Students WHERE username=%s AND student_id=%s", (studentname, student_id))
         elif role == 'Admin':
-            cursor.execute("SELECT * FROM Admins WHERE username=%s AND password=%s", (username, credential))
+            cursor.execute("SELECT * FROM Admins WHERE username=%s AND password=%s", (studentname, student_id))
         user = cursor.fetchone()
         cursor.close()
         connection.close()
@@ -67,7 +67,7 @@ def main():
         }
         .stButton>button {
             background-color: #4CAF50;
-            color: white.
+            color: white;
         }
         </style>
         """,
@@ -82,10 +82,13 @@ def main():
     if not st.session_state.logged_in:
         st.title("SARAS - Student Attendance Record System")
         role = st.selectbox("Select Role", ["Student", "Admin"])
-        username = st.text_input("Username")
-        credential = st.text_input("Student ID" if role == "Student" else "Password", type="password")
+        studentname = st.text_input("Student Name" if role == "Student" else "Username")
+        if role == "Student":
+            student_id = st.text_input("Student ID", type="password")
+        else:
+            student_id = st.text_input("Password", type="password")
         if st.button("Login"):
-            user = login_user(username, credential, role)
+            user = login_user(studentname, student_id, role)
             if user:
                 st.session_state.logged_in = True
                 st.session_state.role = role
@@ -95,7 +98,7 @@ def main():
     else:
         user = st.session_state.user
         role = st.session_state.role
-        st.success(f"Welcome {user['username']}!")
+        st.success(f"Welcome {user['username'] if role == 'Admin' else user['username']}!")
         
         if role == "Student":
             records = get_attendance_records(user['student_id'])
