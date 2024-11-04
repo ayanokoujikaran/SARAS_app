@@ -17,14 +17,14 @@ def get_db_connection():
         return None
 
 # User login function
-def login_user(username, student_id, role):
+def login_user(username, credential, role):
     connection = get_db_connection()
     if connection:
         cursor = connection.cursor(dictionary=True)
         if role == 'Student':
-            cursor.execute("SELECT * FROM Students WHERE username=%s AND student_id=%s", (username, student_id))
+            cursor.execute("SELECT * FROM Students WHERE username=%s AND student_id=%s", (username, credential))
         elif role == 'Admin':
-            cursor.execute("SELECT * FROM Admins WHERE username=%s AND password=%s", (username, student_id))
+            cursor.execute("SELECT * FROM Admins WHERE username=%s AND password=%s", (username, credential))
         user = cursor.fetchone()
         cursor.close()
         connection.close()
@@ -67,7 +67,7 @@ def main():
         }
         .stButton>button {
             background-color: #4CAF50;
-            color: white;
+            color: white.
         }
         </style>
         """,
@@ -83,9 +83,9 @@ def main():
         st.title("SARAS - Student Attendance Record System")
         role = st.selectbox("Select Role", ["Student", "Admin"])
         username = st.text_input("Username")
-        student_id = st.text_input("Student ID", type="password")
+        credential = st.text_input("Student ID" if role == "Student" else "Password", type="password")
         if st.button("Login"):
-            user = login_user(username, student_id, role)
+            user = login_user(username, credential, role)
             if user:
                 st.session_state.logged_in = True
                 st.session_state.role = role
