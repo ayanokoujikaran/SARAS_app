@@ -73,7 +73,7 @@ def delete_attendance_record(student_id, date):
 
 # Main application function
 def main():
-    st.set_page_config(page_title="SARAS - Student Attendance Record System", page_icon=":books:", layout="wide")
+    st.set_page_config(page_title="SARAS - Student Attendance Record Access System", page_icon=":books:", layout="wide")
     st.markdown(
         """
         <style>
@@ -95,7 +95,7 @@ def main():
         st.session_state.user = None
 
     if not st.session_state.logged_in:
-        st.title("SARAS - Student Attendance Record System")
+        st.title("SARAS - Student Attendance Record Access System")
         role = st.selectbox("Select Role", ["Student", "Admin"])
         studentname = st.text_input("Student Name" if role == "Student" else "Username")
         if role == "Student":
